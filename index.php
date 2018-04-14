@@ -1,44 +1,69 @@
 <?php
-$alunos=$_REQUEST['alunos'];
-$turmValida = false;
+require_once "funcoes/funcArquivo.php";
+$arrayTurmas = array("INFD1"=>"1o. INFORMÁTICA DIURNO",
+                    "INFD2"=>"2o. INFORMÁTICA DIURNO",
+                    "INFD3"=>'3o. INFORMÁTICA DIURNO',
+                    "CTI1"=>"1o. TÉCNICO INFORMÁTICA NOTURNO",
+                    "CTI2"=>"2o. TÉCNICO INFORMÁTICA NOTURNO");
+$arrayDisciplinas = array(
+    "DAW"=>"Desenvolvimento de Aplicações WEB",
+    "DDM"=>"Desenvolvimento para Dispositivos Móveis",
+    "DAD"=>"Desenvolvimento de Aplicações Desktop",
+    "ED"=>"Estruturas de Dados",
+    "EG"=>"Edititoração Gráfica");
+
+$turmaValida = false;
 $alunosValido = false;
+
+
+if(isset($_REQUEST["turma"])){
+    $turma = $_REQUEST['turma'];
+    $turmaValida=true;
+}
+if(isset($_REQUEST['alunos'])
+    &&
+    is_numeric($_REQUEST['alunos'])
+    &&
+    (
+        $_REQUEST['alunos']>=1
+        &&
+        $_REQUEST['alunos']<=40
+    )
+
+){
+    $alunos = $_REQUEST['alunos'];
+    $alunosValido = true;
+}
+
 if(isset($_REQUEST["btnTurma"])){
-    //validação dos dados
-    if(isset($_REQUEST["turma"])){
-       $turma = $_REQUEST['turma'];
-       $turmValida=true;
-    }
-    else{
+    if(!$turmaValida){
         echo "Informação [turma] inválida!";
     }
 
-    if(isset($_REQUEST['alunos'])
-        &&
-        is_numeric($_REQUEST['alunos'])
-        &&
-        (
-                $_REQUEST['alunos']>=1
-                &&
-                $_REQUEST['alunos']<=40
-        )
-
-    ){
-       $alunos = $_REQUEST['alunos'];
-        $alunosValido = true;
-    }
-    else{
+    if(!$alunosValido){
         echo "Informação [alunos] inválida!";
     }
 }
-if(isset($_REQUEST['btnDisciplina']))
+
+if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
 {
-    $turmValida = true;
+    $disciplina = $_REQUEST['disciplina'];
+    $turma = $_REQUEST['turma'];
+    $turmaValida = true;
     $alunosValido = true;
-    $mediaGeral=0.0;
-    if(isset($_REQUEST['boletim']))
-    {
-        $alunos = $_REQUEST['alunos'];
+
+
+    if(isset($_REQUEST['btnCarregarBoletim'])){
+        $boletim = carregaBoletim($turma,$disciplina);
+    }else if(isset($_REQUEST['btnDisciplina'])){
         $boletim = $_REQUEST['boletim'];
+    }
+
+    /*    $turmaValida = true;
+    $alunosValido = true;*/
+    $mediaGeral=0.0;
+    if(count($boletim)>0)
+    {
         for($n=0; $n<$alunos; $n++){
            $mediafinal = ($boletim[$n]['media1s'] +
                           $boletim[$n]['media2s']) / 2.0;
@@ -48,6 +73,11 @@ if(isset($_REQUEST['btnDisciplina']))
            $mediaGeral+=$mediafinal;
         }
         $mediaGeral = $mediaGeral/$n;
+    }
+
+    //salva os dados em arquivo
+    if(isset($_REQUEST['btnDisciplina'])){
+        gravaBoletim($turma, $disciplina, $boletim);
     }
 }
 ?>
@@ -70,9 +100,14 @@ if(isset($_REQUEST['btnDisciplina']))
     <form class="form form-group" method="post">
                     <label for="turma">Turma: </label>
                     <select name="turma" id="idTurma" class="form-control">
-                        <option value="infd1">INFD1</option>
-                        <option value="infd2">INFD2</option>
-                        <option value="infd3">INFD3</option>
+                    <?php
+                        foreach ($arrayTurmas as $siglaTurma=>$nomeTurma){
+                            echo "<option value='$siglaTurma' ";
+                            if($siglaTurma==$turma)
+                                echo "selected";
+                            echo ">",$nomeTurma,"</option>\n";
+                        }
+                    ?>
                     </select>
                     <label for="alunos">Número de Alunos: </label>
                     <input class="form-control"
@@ -84,33 +119,40 @@ if(isset($_REQUEST['btnDisciplina']))
                             type="submit"
                             name="btnTurma"
                             value="Enviar">
-    </form>
+
     <?php
-    if($turmValida and $alunosValido) {
+    if($turmaValida && $alunosValido) {
         ?>
-            <form class="form form-group" method="post">
-            <input type="hidden"
-                name="alunos"
-                   value="<?php echo $alunos;?>"
-            >
+        <br><br>
             <table class="table table-bordered table-secondary">
                 <thead >
                 <tr>
-                    <th COLSPAN="5">
+                    <th COLSPAN="3">
                         <label for="disciplina">Disciplina: </label>
                         <select name="disciplina" id="disciplina" class="custom-select">
-                            <option value="daw">Desenv. Aplic. WEB</option>
-                            <option value="ddm">Desenv. Disp. Móveis</option>
-                            <option value="dad">Desenv. Aplic. Desktop</option>
-                            <option value="ed">Estruturas de Dados</option>
+                            <?php
+                            foreach ($arrayDisciplinas as $siglaDisc=>$nomeDisc){
+                                echo "<option value='$siglaDisc' ";
+                                if($siglaDisc==$disciplina)
+                                    echo "selected";
+                                echo ">",$nomeDisc,"</option>\n";
+                            }
+                            ?>
                         </select>
+                    </th>
+                    <th colspan="2"  class="text-lg-center">
+                        <input class="btn btn-success"
+                               type="submit"
+                               name="btnCarregarBoletim"
+                               value="Carregar"
+                        >
                     </th>
                     <th colspan="2"  class="text-lg-center">
                         <input class="btn btn-success"
                                type="submit"
                                name="btnDisciplina"
                                value="Processar"
-                               >
+                        >
                     </th>
                 </tr>
                 <tr>
