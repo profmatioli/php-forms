@@ -1,10 +1,10 @@
 <?php
 require_once "funcoes/funcArquivo.php";
-$arrayTurmas = array("INFD1"=>"1o. INFORMÁTICA DIURNO",
+$arrayTurmas = ["INFD1"=>"1o. INFORMÁTICA DIURNO",
     "INFD2"=>"2o. INFORMÁTICA DIURNO",
     "INFD3"=>'3o. INFORMÁTICA DIURNO',
     "CTI1"=>"1o. TÉCNICO INFORMÁTICA NOTURNO",
-    "CTI2"=>"2o. TÉCNICO INFORMÁTICA NOTURNO");
+    "CTI2"=>"2o. TÉCNICO INFORMÁTICA NOTURNO"];
 $arrayDisciplinas = array(
     "DAW"=>"Desenvolvimento de Aplicações WEB",
     "DDM"=>"Desenvolvimento para Dispositivos Móveis",
@@ -99,7 +99,7 @@ if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
 </div>
 <div class="container">
     <form class="form form-group" method="post">
-        <label for="turma">Turma: </label>
+        <label for="idTurma">Turma: </label>
         <select name="turma" id="idTurma" class="form-control">
             <?php
             foreach ($arrayTurmas as $siglaTurma=>$nomeTurma){
