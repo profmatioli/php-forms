@@ -14,6 +14,10 @@ $arrayDisciplinas = array(
 
 $turmaValida = false;
 $alunosValido = false;
+$turma=null;
+$alunos=null;
+$disciplina=null;
+$boletim=null;
 
 
 if(isset($_REQUEST["turma"])){
@@ -34,7 +38,9 @@ if(isset($_REQUEST['alunos'])
     $alunos = $_REQUEST['alunos'];
     $alunosValido = true;
 }
-
+if(isset($_REQUEST['disciplina'])){
+    $disciplina = $_REQUEST['disciplina'];
+}
 if(isset($_REQUEST["btnTurma"])){
     if(!$turmaValida){
         echo "Informação [turma] inválida!";
@@ -45,7 +51,7 @@ if(isset($_REQUEST["btnTurma"])){
     }
 }
 
-if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
+if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnProcessar']))
 {
     $disciplina = $_REQUEST['disciplina'];
     $turma = $_REQUEST['turma'];
@@ -56,18 +62,19 @@ if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
     if(isset($_REQUEST['btnCarregarBoletim'])){
         $boletim = carregaBoletim($turma,$disciplina);
         $alunos = count($boletim);
-    }else if(isset($_REQUEST['btnDisciplina'])){
+    }else if(isset($_REQUEST['btnProcessar'])){
         $boletim = $_REQUEST['boletim'];
     }
 
-    /*    $turmaValida = true;
-    $alunosValido = true;*/
     $mediaGeral=0.0;
     if(count($boletim)>0)
     {
         for($n=0; $n<$alunos; $n++){
-            $mediafinal = ($boletim[$n]['media1s'] +
-                    $boletim[$n]['media2s']) / 2.0;
+            $mediafinal=0.0;
+            if(is_numeric($boletim[$n]['media1s']) && is_numeric($boletim[$n]['media2s'])) {
+                $mediafinal = ($boletim[$n]['media1s'] +
+                        $boletim[$n]['media2s']) / 2.0;
+            }
             $situacao = $mediafinal>=6.0 ? "Aprovado" : "Reprovado";
             $boletim[$n]['mediafinal'] = $mediafinal;
             $boletim[$n]['situacao'] = $situacao;
@@ -77,7 +84,7 @@ if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
     }
 
     //salva os dados em arquivo
-    if(isset($_REQUEST['btnDisciplina'])){
+    if(isset($_REQUEST['btnProcessar'])){
         gravaBoletim($turma, $disciplina, $boletim);
     }
 }
@@ -121,7 +128,7 @@ if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
         <select name="disciplina" id="disciplina" class="custom-select">
             <?php
             foreach ($arrayDisciplinas as $siglaDisc=>$nomeDisc){
-                echo "<option value='$siglaDisc' ";
+                echo "<option value='$siglaDisc'";
                 if($siglaDisc==$disciplina)
                     echo "selected";
                 echo ">",$nomeDisc,"</option>\n";
@@ -151,7 +158,7 @@ if(isset($_REQUEST['btnCarregarBoletim']) || isset($_REQUEST['btnDisciplina']))
                 <th colspan="3"  class="text-lg-center">
                     <input class="btn btn-success"
                            type="submit"
-                           name="btnDisciplina"
+                           name="btnProcessar"
                            value="Processar"
                     >
                 </th>

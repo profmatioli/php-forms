@@ -1,8 +1,8 @@
 <?php
 function gravaBoletim($turma, $disc, $arrayBoletim)
 {
-    $nomeDir = '../dados/'.$turma;
-    if(!mkdir($nomeDir,0777,true)){
+    $nomeDir = 'dados/'.$turma;
+    if(!@mkdir($nomeDir,0777,true)){
         chmod($nomeDir, 0777);
     };
 
@@ -22,7 +22,7 @@ function gravaBoletim($turma, $disc, $arrayBoletim)
 }
 
 function carregaBoletim($turma, $disc){
-    $nomeDir = '../dados/'.$turma;
+    $nomeDir = 'dados/'.$turma;
     $nomeArquivo = $nomeDir.'/'.$disc.".txt";
 
     $aBoletim=array();
